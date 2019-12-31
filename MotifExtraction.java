@@ -34,15 +34,17 @@ public class MotifExtraction {
 		for(int m=0; m < Peptides.size(); m++) System.out.println(m+":"+ " " + Peptides.get(m));
 		ArrayList<Set<Integer>> AdjacencyList = new ArrayList();
 		AdjacencyList = AdjList(Peptides);
+		
 		ArrayList <Set<Integer>> Result = new ArrayList();
     	Result = (ArrayList<Set<Integer>>) findCliques(AdjacencyList).stream().filter(c -> c.size() > 1).collect(Collectors.toList());
+    	
     	System.out.println();
     	System.out.println("We have:  " + Result.size() + " "+ " Cliques in the Graph");
     	System.out.println();
     	
     	// Writing to a file
     	
-    	File file2 = new File("‎⁨3Result.txt⁩⁩");
+    	File file2 = new File("‎⁨1Result.txt⁩⁩");
 		PrintStream out = new PrintStream(file2);
     	out.println("We have:  " + Result.size() + " "+ " Cliques in the Graph");
     	out.println();
@@ -57,31 +59,34 @@ public class MotifExtraction {
     	TM3.add(AminoAcid.Q);TM3.add(AminoAcid.Dash);TM3.add(AminoAcid.W);TM3.add(AminoAcid.Dash);TM3.add(AminoAcid.Dash);TM3.add(AminoAcid.H);TM3.add(AminoAcid.N);
     	
     	
-    	int Cnt = 56;
-    	int nMotifs = 3;
+    	int Cnt = 10;
+    	int nMotifs = 1;
+    	int CntNew = CountNum(Cnt, Result);
     	
     	int M1 = 0; int M2 = 0; int M3 = 0;
     	int C = 0;
     	
-    	for(int j = 0; j < Cnt; j++) {
+    	for(int j = 0; j <= CntNew; j++) {
+    	
     		System.out.println("      Round: " + " " + j);
     		out.println("      Round: " + " " + j);
     		System.out.println();
     		out.println();
-    	int MaxCliqueSize = 0;
-    	// k = Index of Maximal Clique in the ArrayList of All Cliques(Result)
-    	int k=0;
-    	for(int i = 0; i < Result.size(); i++) {
-    		if (Result.get(i).size() > MaxCliqueSize) { 
-    			MaxCliqueSize = Result.get(i).size();
-    			k = i;
-    		}
-    	}   	
-    	System.out.println("Size of the Maximum Clique in the Graph is " + " "  + Result.get(k).size());
-    	out.println("Size of the Maximum Clique in the Graph is " + " "  + Result.get(k).size());
+    		
+    		int MaxCliqueSize = 0;
+    		// k = Index of Maximal Clique in the ArrayList of All Cliques(Result)
+    		int k = 0;
+    		for(int i = 0; i < Result.size(); i++) {
+    			if (Result.get(i).size() > MaxCliqueSize) { 
+    				MaxCliqueSize = Result.get(i).size();
+    				k = i;
+    			}
+    		}   	
+    		System.out.println("Size of the Maximum Clique in the Graph is " + " "  + Result.get(k).size());	
+    		out.println("Size of the Maximum Clique in the Graph is " + " "  + Result.get(k).size());
 
-    	ArrayList<String> Final4Mers = new ArrayList<String>();
-    	    	for(Iterator it = Result.get(k).iterator(); it.hasNext();) {
+    		ArrayList<String> Final4Mers = new ArrayList<String>();
+    			for(Iterator it = Result.get(k).iterator(); it.hasNext();) {
     	    		Final4Mers.add(Peptides.get((Integer)it.next()));    
     	    	}
     				System.out.println("Final Answer is" + ":" );
@@ -91,22 +96,26 @@ public class MotifExtraction {
     				System.out.println("    " + Consensus(Final4Mers).toString());
     				out.println("    " + Consensus(Final4Mers).toString());
     				Consensus(Final4Mers);
-    				if(Consensus(Final4Mers).equals(TM1)) {
+    				
+    				if(Consensus(Final4Mers).get(0) == AminoAcid.A && Consensus(Final4Mers).get(3) == AminoAcid.T && 
+    						Consensus(Final4Mers).get(4) == AminoAcid.G && Consensus(Final4Mers).get(6) == AminoAcid.Y) {
     					M1+=1;
     				}
-    				if(Consensus(Final4Mers).equals(TM2)) {
+    			/*	if(Consensus(Final4Mers).equals(TM2)) {
     					M2+=1;
     				}
     				if(Consensus(Final4Mers).equals(TM3)) {
     					M3+=1;
     				}
-    				
+    			*/	
     				
     				
     				Result.remove(k);
     				System.out.println();
+    				System.out.println();
     				out.println();
     	}
+    	//while
     	
 		
 		if(M1 > 1) M1 = 1;
@@ -114,31 +123,37 @@ public class MotifExtraction {
 		if(M3 > 1) M3 = 1;
 		C = M1 + M2 + M3;
 		
-    	double Specificity = C*100/ Cnt;;
+    	double Specificity = C*100/ CntNew;;
 		double Sensitivity = C*100/ nMotifs;
 		
 		System.out.println();
-		System.out.println("     Number of Cliques is: " + " " + Cnt);
+		System.out.println("     Number of Cliques is: " + " " + CntNew);
 		System.out.println("     Sensitivity is: " + "%" + Sensitivity);
-		System.out.println("     Specificity is: " + "%" + Specificity);
+		System.out.println("     Recall is: " + "%" + Specificity);
 		System.out.println("     -------------------------");
+		
+		out.println();
+		out.println("     Number of Cliques is: " + " " + CntNew);
+		out.println("     Sensitivity is: " + "%" + Sensitivity);
+		out.println("     Recall is: " + "%" + Specificity);
+		out.println("     -------------------------");
 		
 	}
 	
 	public static ArrayList<Set<Integer>> AdjList(Vector<String> seq){
 		ArrayList<Set<Integer>> adjacencyList = new ArrayList<Set<Integer>> ();
-		for(int i=0; i<seq.size(); i++) {
+		for(int i = 0; i < seq.size(); i++) {
 			adjacencyList.add(new HashSet());
 		}
-		for(int i=0; i<seq.size(); i++) 
+		for(int i = 0; i < seq.size(); i++) 
 		{
 			for(int j = 0; j < seq.size(); j++) 
 			{
 				if(i == j)continue;
-				int score=0;
+				int score = 0;
 				for(int k = 0; k < 7; k++) 
 				{
-					if( seq.get(i).charAt(k) == seq.get(j).charAt(k) && seq.get(i).charAt(k) != '-' ) 
+					if( seq.get(i).charAt(k) == seq.get(j).charAt(k) && seq.get(i).charAt(k) != '-') 
 					{
 						score+=1;
 					}
@@ -332,5 +347,24 @@ public class MotifExtraction {
 	     }
 	 }
 		return FinalMotif;
+	}
+	
+	public static int CountNum(int Cnt, ArrayList <Set<Integer>> Result) {
+		int CntNew = 1;
+		ArrayList<Integer> temp = new ArrayList<Integer>();
+		for(int i= 0; i<Result.size(); i++) {
+			temp.add(Result.get(i).size());
+		}
+		int max = Collections.max(temp);
+		int countA = Collections.frequency(temp, max);
+		Collections.sort(temp, Collections.reverseOrder());
+		if (Cnt < countA) CntNew = countA - Cnt;
+		if (Cnt > countA) {
+			temp.remove(max);
+			max = Collections.max(temp);
+			countA = Collections.frequency(temp, max);
+			CntNew = Cnt + countA;
+		}
+		return CntNew;
 	}
 }
